@@ -1,0 +1,37 @@
+{
+  "name": "iot-cloud-platform",
+  "version": "1.0.0",
+  "description": "IoT Cloud Platform similar to ThingSpeak",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required'",
+    "postinstall": "echo 'Installation complete'",
+    "vercel-build": "echo 'Vercel build complete'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "iot",
+    "cloud",
+    "platform",
+    "thingspeak",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-mongo": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Details - IoT Cloud Platform</title>
+    <link rel="icon" type="image/png" href="iotcloud-logo.png">
+    <link rel="stylesheet" href="channel-detail.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="modern-channel-body">
+    <!-- Modern Header with Gradient -->
+    <div class="modern-header">
+        <div class="header-glass">
+            <div class="header-content-modern">
+                <div class="channel-title-section">
+                    <div class="channel-icon">
+                        <i class="fas fa-broadcast-tower"></i>
+                    </div>
+                    <div class="title-info">
+                        <h1 id="channelName">Loading...</h1>
+                        <p class="channel-subtitle">IoT Data Channel</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="modern-btn secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <div class="status-indicator">
+                        <div class="status-dot active" id="statusDot"></div>
+                        <span id="statusText">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="modern-dashboard">
+        <!-- Top Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="totalEntries">0</div>
+                    <div class="stat-label">Total Entries</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="lastUpdate">Never</div>
+                    <div class="stat-label">Last Update</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-circle"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="activeFields">0</div>
+                    <div class="stat-label">Active Fields</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-signal"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card info">
+                <div class="stat-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">API</div>
+                    <div class="stat-label">Keys Active</div>
+                </div>
+                <div class="stat-trend">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Channel Information Panel -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-info-circle"></i> Channel Information</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-tag"></i>
+                                Channel Name
+                            </div>
+                            <div class="info-value" id="channelNameInfo">-</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-align-left"></i>
+                                Description
+                            </div>
+                            <div class="info-value" id="channelDescription">-</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Created
+                            </div>
+                            <div class="info-value" id="channelCreated">-</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-globe"></i>
+                                Privacy
+                            </div>
+                            <div class="info-value">
+                                <span class="privacy-badge" id="privacyBadge">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fields Configuration Panel -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-list-ul"></i> Data Fields</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="fields-container" id="fieldsContainer">
+                        <!-- Fields will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Keys Panel -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-key"></i> API Configuration</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="api-section">
+                        <div class="api-item">
+                            <div class="api-label">
+                                <i class="fas fa-hashtag"></i>
+                                Channel ID
+                            </div>
+                            <div class="api-value-container">
+                                <code class="api-value" id="channelId">-</code>
+                                <button class="copy-button" onclick="copyToClipboard('channelId')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="api-item">
+                            <div class="api-label">
+                                <i class="fas fa-edit"></i>
+                                Write API Key
+                            </div>
+                            <div class="api-value-container">
+                                <code class="api-value" id="writeApiKey">-</code>
+                                <button class="copy-button" onclick="copyToClipboard('writeApiKey')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="api-item">
+                            <div class="api-label">
+                                <i class="fas fa-eye"></i>
+                                Read API Key
+                            </div>
+                            <div class="api-value-container">
+                                <code class="api-value" id="readApiKey">Not generated</code>
+                                <button class="copy-button" onclick="copyToClipboard('readApiKey')" id="copyReadKey" style="display: none;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="generate-button" onclick="generateReadKey()" id="generateReadKey">
+                                    <i class="fas fa-plus"></i> Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="action-grid">
+                        <button class="action-card share-action" onclick="shareChannel()">
+                            <div class="action-icon">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <div class="action-text">
+                                <span class="action-title">Share Channel</span>
+                                <span class="action-desc">Get public link</span>
+                            </div>
+                        </button>
+                        
+                        
+                        <button class="action-card delete-action" onclick="deleteChannel()">
+                            <div class="action-icon">
+                                <i class="fas fa-trash-alt"></i>
+                            </div>
+                            <div class="action-text">
+                                <span class="action-title">Delete Channel</span>
+                                <span class="action-desc">Remove permanently</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Panel -->
+            <div class="glass-panel charts-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-chart-area"></i> Data Visualization</h3>
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label for="fieldSelector"><i class="fas fa-layer-group"></i> Field:</label>
+                            <select id="fieldSelector" class="field-selector">
+                                <option value="">Select Field</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="chartTypeSelector"><i class="fas fa-chart-line"></i> Type:</label>
+                            <select id="chartTypeSelector" class="chart-type-selector">
+                                <option value="line">Line Chart</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="doughnut">Doughnut Chart</option>
+                                <option value="area">Area Chart</option>
+                            </select>
+                        </div>
+                        <button class="update-chart-btn" onclick="updateVisualization()">
+                            <i class="fas fa-sync-alt"></i> Update
+                        </button>
+                        <button class="refresh-toggle-btn" id="refreshToggleBtn" onclick="toggleAutoRefresh()">
+                            <i class="fas fa-pause"></i> Pause Refresh
+                        </button>
+                        <button class="iframe-copy-btn" id="iframeCopyBtn" onclick="copyIframeCode()">
+                            <i class="fas fa-code"></i> Copy Embed Code
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-options" id="chartOptions">
+                        <div class="option-group">
+                            <label for="dataPointsRange">Data Points:</label>
+                            <select id="dataPointsRange" class="data-range-selector">
+                                <option value="10">Last 10</option>
+                                <option value="25">Last 25</option>
+                                <option value="50" selected>Last 50</option>
+                                <option value="100">Last 100</option>
+                                <option value="all">All Data</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="timeRange">Time Range:</label>
+                            <select id="timeRange" class="time-range-selector">
+                                <option value="1h">Last Hour</option>
+                                <option value="6h">Last 6 Hours</option>
+                                <option value="24h" selected>Last 24 Hours</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="charts-container" id="chartsContainer">
+                        <!-- Charts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="channel-detail.js"></script>
+</body>
+</html>

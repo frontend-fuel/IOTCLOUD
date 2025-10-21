@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Chart Embed</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin: 8px;
+            padding: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05);
+            height: calc(100vh - 16px);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.1);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .chart-title {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-title::before {
+            content: "📊";
+            font-size: 18px;
+        }
+        .chart-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .data-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: #059669;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .last-update {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #6b7280;
+            gap: 12px;
+        }
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #ef4444;
+            text-align: center;
+            gap: 12px;
+        }
+        .error-icon {
+            font-size: 48px;
+            opacity: 0.7;
+        }
+        .error-message {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .error-details {
+            font-size: 12px;
+            opacity: 0.7;
+            max-width: 300px;
+        }
+        .powered-by {
+            text-align: center;
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            font-weight: 500;
+        }
+        .powered-by img {
+            height: 18px;
+            width: auto;
+            opacity: 0.8;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: #059669;
+            font-weight: 600;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .chart-container {
+                margin: 4px;
+                padding: 12px;
+                border-radius: 12px;
+            }
+            .chart-title {
+                font-size: 16px;
+            }
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .chart-info {
+                align-items: flex-start;
+                flex-direction: row;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3 class="chart-title" id="chartTitle">Loading Chart...</h3>
+            <div class="chart-info" id="chartInfo">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Preparing data...</span>
+                </div>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="embedChart"></canvas>
+        </div>
+        <div class="powered-by">
+            <span>Powered by</span>
+            <img src="iotcloud-logo.png" alt="IoT Cloud Platform">
+            <span>IoT Cloud Platform</span>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span>LIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelId = urlParams.get('channelId');
+        const readApiKey = urlParams.get('readApiKey');
+        const field = urlParams.get('field');
+        const chartType = urlParams.get('chartType') || 'line';
+        const dataPoints = urlParams.get('dataPoints') || '50';
+        const timeRange = urlParams.get('timeRange') || 'all';
+
+        let chart = null;
+
+        // Load and display chart
+        async function loadEmbedChart() {
+            try {
+                if (!channelId || !readApiKey || !field) {
+                    throw new Error('Missing required parameters');
+                }
+
+                // Fetch data
+                const response = await fetch(`/api/data/channels/${channelId}?read_api_key=${readApiKey}&results=1000`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const data = await response.json();
+                const feeds = data.feeds || [];
+
+                if (feeds.length === 0) {
+                    throw new Error('No data available');
+                }
+
+                // Filter data by time range
+                const filteredFeeds = filterDataByRange(feeds, field, timeRange);
+                
+                // Prepare chart data
+                const chartData = prepareChartData(filteredFeeds, field, dataPoints);
+
+                if (chartData.data.length === 0) {
+                    throw new Error('No data for selected field');
+                }
+
+                // Update title and info
+                document.getElementById('chartTitle').textContent = `${data.channel.name} - ${field}`;
+                document.getElementById('chartInfo').innerHTML = `
+                    <div class="data-count">${chartData.data.length} data points</div>
+                    <div class="last-update">Updated: ${new Date().toLocaleTimeString()}</div>
+                `;
+
+                // Create chart
+                createChart(chartData, field, chartType);
+
+            } catch (error) {
+                console.error('Error loading embed chart:', error);
+                document.querySelector('.chart-wrapper').innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-message">Failed to load chart</div>
+                        <div class="error-details">${error.message}</div>
+                    </div>
+                `;
+                document.getElementById('chartInfo').innerHTML = `
+                    <div class="data-count" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">Error</div>
+                `;
+            }
+        }
+
+        // Filter data by time range
+        function filterDataByRange(feeds, fieldName, timeRange) {
+            const now = new Date();
+            let cutoffTime;
+            
+            switch (timeRange) {
+                case '1h':
+                    cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
+                    break;
+                case '6h':
+                    cutoffTime = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+                    break;
+                case '24h':
+                    cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                    break;
+                case '7d':
+                    cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                default:
+                    return feeds.filter(feed => feed[fieldName] !== null && feed[fieldName] !== undefined);
+            }
+            
+            return feeds.filter(feed => {
+                const feedTime = new Date(feed.createdAt);
+                return feedTime >= cutoffTime && feed[fieldName] !== null && feed[fieldName] !== undefined;
+            });
+        }
+
+        // Prepare chart data
+        function prepareChartData(feeds, fieldName, dataPoints) {
+            let processedFeeds = feeds;
+            
+            // Limit data points if specified
+            if (dataPoints !== 'all') {
+                const limit = parseInt(dataPoints);
+                processedFeeds = feeds.slice(-limit);
+            }
+            
+            const labels = processedFeeds.map(feed => {
+                const date = new Date(feed.createdAt);
+                return date.toLocaleTimeString('en-US', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit'
+                });
+            });
+            
+            const data = processedFeeds.map(feed => {
+                const value = feed[fieldName];
+                return value !== null && value !== undefined ? parseFloat(value) : null;
+            }).filter(val => val !== null);
+            
+            return { labels, data };
+        }
+
+        // Create chart
+        function createChart(chartData, fieldLabel, chartType) {
+            const ctx = document.getElementById('embedChart').getContext('2d');
+            
+            const colors = {
+                primary: '#3b82f6',
+                secondary: '#10b981',
+                accent: '#f59e0b',
+                danger: '#ef4444'
+            };
+
+            const config = {
+                type: chartType === 'area' ? 'line' : chartType,
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: fieldLabel,
+                        data: chartData.data,
+                        borderColor: chartType === 'doughnut' ? generateColors(chartData.data.length) : colors.primary,
+                        backgroundColor: chartType === 'doughnut' ? 
+                            generateColors(chartData.data.length) : 
+                            `rgba(59, 130, 246, ${chartType === 'area' ? '0.2' : '0.05'})`,
+                        borderWidth: chartType === 'doughnut' ? 0 : 3,
+                        pointRadius: chartType === 'line' ? 4 : 0,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: colors.primary,
+                        pointBorderWidth: 2,
+                        tension: chartType === 'line' || chartType === 'area' ? 0.4 : 0,
+                        fill: chartType === 'area',
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 4,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(59, 130, 246, 0.3)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: chartType === 'doughnut',
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#374151',
+                            borderColor: 'rgba(59, 130, 246, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            titleFont: {
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                weight: '500'
+                            }
+                        }
+                    },
+                    scales: chartType === 'doughnut' ? {} : {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(59, 130, 246, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                },
+                                padding: 8
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                },
+                                maxRotation: 0,
+                                padding: 8
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverBorderWidth: 3
+                        }
+                    }
+                }
+            };
+
+            chart = new Chart(ctx, config);
+        }
+
+        // Generate colors for doughnut chart
+        function generateColors(count) {
+            const colors = [
+                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+            ];
+            return Array.from({length: count}, (_, i) => colors[i % colors.length]);
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadEmbedChart, 30000);
+
+        // Load initial chart
+        loadEmbedChart();
+    </script>
+</body>
+</html>

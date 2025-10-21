@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - IoT Cloud Platform</title>
+    <link rel="icon" type="image/png" href="/iotcloud-logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="iotcloud-logo.png" alt="IoT Platform" class="logo-img">
+                <span>IoT Platform</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-label">Main</div>
+            <a href="#" class="nav-item active" onclick="showSection('overview')">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('channels')">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Channels</span>
+            </a>
+            
+            <div class="nav-divider"></div>
+            <div class="nav-label">Account</div>
+            <a href="#" class="nav-item" onclick="showSection('settings')">
+                <i class="fas fa-user-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Top Navigation -->
+        <nav class="topbar">
+            <div class="topbar-left">
+                
+                <h1 id="pageTitle">Dashboard Overview</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                    </div>
+                    <div class="dropdown">
+                        <button class="dropdown-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="#" onclick="showSection('settings')">
+                                <i class="fas fa-user-cog"></i> Profile Settings
+                            </a>
+                            <a href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Overview Section -->
+            <div id="overviewSection" class="content-section active">
+                <!-- Website Description -->
+                <div class="description-section">
+                    <div class="description-card">
+                        <div class="description-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="description-content">
+                            <h2>Welcome to IoT Cloud Platform</h2>
+                            <p>A powerful, easy-to-use platform for collecting, storing, and managing data from your IoT devices. Create channels, monitor sensors in real-time, and manage your IoT data efficiently.</p>
+                            <div class="features-list">
+                                <span class="feature-tag"><i class="fas fa-check"></i> Real-time Data Collection</span>
+                                <span class="feature-tag"><i class="fas fa-check"></i> RESTful API</span>
+                                <span class="feature-tag"><i class="fas fa-check"></i> Secure & Scalable</span>
+                                <span class="feature-tag"><i class="fas fa-check"></i> Easy Management</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalChannels">0</h3>
+                            <p>Total Channels</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="activeChannels">0</h3>
+                            <p>Active Channels</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="lastUpdate">--</h3>
+                            <p>Last Update</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="section-card">
+                    <div class="card-header">
+                        <h2>Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="showCreateChannelModal()">
+                            <i class="fas fa-plus"></i>
+                            <span>Create Channel</span>
+                        </button>
+                        <button class="action-btn" onclick="showAPIGuide()">
+                            <i class="fas fa-code"></i>
+                            <span>API Guide</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Channels Section -->
+            <div id="channelsSection" class="content-section">
+                <div class="channels-header">
+                    <h2>My Channels</h2>
+                    <div class="channels-actions">
+                        <button class="btn btn-success" onclick="showCreateChannelModal()">
+                            <i class="fas fa-plus"></i> New Channel
+                        </button>
+                        <div class="search-container">
+                            <input type="text" placeholder="Search by tag" class="search-input">
+                            <button class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="channels-table-container">
+                    <table class="channels-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable">
+                                    Name <i class="fas fa-sort"></i>
+                                </th>
+                                <th class="sortable">
+                                    Created <i class="fas fa-sort"></i>
+                                </th>
+                                <th class="sortable">
+                                    Updated <i class="fas fa-sort"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="channelsTableBody">
+                            <!-- Channels will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <!-- Settings Section -->
+            <div id="settingsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Account Settings</h2>
+                </div>
+                <div class="settings-grid">
+                    <div class="setting-card">
+                        <h3>Profile Information</h3>
+                        <div class="setting-content">
+                            <form id="updateProfileForm">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="settingsName" placeholder="Your name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" id="settingsEmail" placeholder="your@email.com" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="setting-card">
+                        <h3>Security</h3>
+                        <div class="setting-content">
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label>Current Password</label>
+                                    <input type="password" id="currentPassword" placeholder="Current password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" id="newPassword" placeholder="New password" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Channel Modal -->
+    <div id="createChannelModal" class="modal">
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-header">
+                <div class="header-icon">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="header-text">
+                    <h3>Create New IoT Channel</h3>
+                    <p>Set up a new data collection channel for your IoT devices</p>
+                </div>
+                <button class="close-btn modern-close" onclick="closeModal('createChannelModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="createChannelForm" class="modern-form">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Basic Information</h4>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="channelName">
+                                <i class="fas fa-tag"></i>
+                                Channel Name *
+                            </label>
+                            <input type="text" id="channelName" placeholder="e.g., Weather Station Alpha" required>
+                            <small>Choose a descriptive name for your channel</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="channelDescription">
+                                <i class="fas fa-align-left"></i>
+                                Description
+                            </label>
+                            <textarea id="channelDescription" placeholder="Describe what this channel monitors..." rows="3"></textarea>
+                            <small>Optional: Add details about your IoT project</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="privacy-toggle">
+                                <input type="checkbox" id="isPublic" class="toggle-switch">
+                                <label for="isPublic" class="toggle-label">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-text">
+                                        <i class="fas fa-globe"></i>
+                                        Make channel public
+                                    </span>
+                                </label>
+                                <small>Public channels can be viewed by anyone with the link</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fields Configuration Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-list-ul"></i>
+                        <h4>Data Fields Configuration</h4>
+                        <span class="field-counter">Fields: <span id="fieldCount">1</span>/8</span>
+                    </div>
+                    
+                    <div class="fields-info">
+                        <p>Configure up to 8 data fields for your sensors</p>
+                    </div>
+                    
+                    <div id="fieldsContainer" class="fields-container">
+                        <div class="field-item">
+                            <div class="field-header">
+                                <span class="field-number">1</span>
+                                <i class="fas fa-thermometer-half field-icon"></i>
+                            </div>
+                            <div class="field-input">
+                                <input type="text" placeholder="e.g., Temperature" data-field="1">
+                                <small>Field 1 Label</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field-actions">
+                        <button type="button" class="add-field-btn" onclick="addField()">
+                            <i class="fas fa-plus"></i>
+                            Add Another Field
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('createChannelModal')">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-create">
+                        <i class="fas fa-rocket"></i>
+                        Create Channel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Channel Details Modal -->
+    <div id="channelDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="channelDetailsTitle">Channel Details</h3>
+                <button class="close" onclick="closeModal('channelDetailsModal')">&times;</button>
+            </div>
+            <div id="channelDetailsContent">
+                <!-- Channel details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
