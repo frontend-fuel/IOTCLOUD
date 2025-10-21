@@ -64,12 +64,10 @@ app.get('/signup', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// For Vercel deployment
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+// Start server (works for Render and other platforms)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
-// Export for Vercel
+// Export for compatibility
 module.exports = app;
